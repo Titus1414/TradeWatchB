@@ -1,0 +1,17 @@
+{
+  "AppSettings": {
+    "Token": "xecretKeywqejane"
+  },
+  "ConnectionStrings": {
+    //"DefaultConnection": "Server=DESKTOP-OCIJAQA;Database=TradeWatchDB;Trusted_Connection=True;MultipleActiveResultSets=true"
+    "DefaultConnection": "Server=kitchensmania.com;Database=TradeWatchDB;User Id=TradeWatch;Password=f$7W4o2k; MultipleActiveResultSets=true"
+  },
+  "Logging": {
+    "LogLevel": {
+      "Default": "Information",
+      "Microsoft": "Warning",
+      "Microsoft.Hosting.Lifetime": "Information"
+    }
+  },
+  "AllowedHosts": "*"
+}

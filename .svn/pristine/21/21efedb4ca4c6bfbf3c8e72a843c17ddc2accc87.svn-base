@@ -1,0 +1,27 @@
+﻿using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Threading.Tasks;
+
+namespace TradeWatchB.Models.DTO
+{
+    public class WatchListTrenDto
+    {
+        public int Id { get; set; }
+        public string Code { get; set; }
+        public long? Timestamp { get; set; }
+        public long? Gmtoffset { get; set; }
+        public double? Open { get; set; }
+        public double? High { get; set; }
+        public double? Low { get; set; }
+        public double? Close { get; set; }
+        public double? Volume { get; set; }
+        public double? PreviousClose { get; set; }
+        public double? Change { get; set; }
+        public double? ChangeP { get; set; }
+        public int? Uid { get; set; }
+        public int? Stkid { get; set; }
+        public int? Ccid { get; set; }
+        public int Forexid { get; set; }
+    }
+}

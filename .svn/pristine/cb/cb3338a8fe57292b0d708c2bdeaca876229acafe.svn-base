@@ -1,0 +1,69 @@
+﻿using Google.Apis.Services;
+using Google.Apis.YouTube.v3;
+using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Threading.Tasks;
+using TradeWatchB.Models;
+using TradeWatchB.Models.DTO;
+
+namespace TradeWatchB.Services.YouTube
+{
+    public class YouTubeSearch : IYouTubeSearch
+    {
+        public async Task<object> SearchByKeywword(string q)
+        {
+            var youtubeService = new YouTubeService(new BaseClientService.Initializer()
+            {
+                ApiKey = ApiKeys.YouTubeApiKey,
+                ApplicationName = this.GetType().ToString()
+            });
+
+            var searchListRequest = youtubeService.Search.List("snippet");
+            searchListRequest.Q = q; // Replace with your search term.
+            searchListRequest.MaxResults = 50;
+
+            // Call the search.list method to retrieve results matching the specified query term.
+            var searchListResponse = await searchListRequest.ExecuteAsync();
+
+            List<YouTubeDto> videos = new List<YouTubeDto>();
+            //List<string> videos = new List<string>();
+            //List<string> channels = new List<string>();
+            //List<string> playlists = new List<string>();
+
+            // Add each result to the appropriate list, and then display the lists of
+            // matching videos, channels, and playlists.
+            foreach (var searchResult in searchListResponse.Items)
+            {
+                switch (searchResult.Id.Kind)
+                {
+                    case "youtube#video":
+                        //videos.Add(String.Format("{0} ({1}) ({2})", searchResult.Snippet.Title, searchResult.Id.VideoId, searchResult.Snippet.Thumbnails.Default__.Url));
+                        //videos.Add(String.Format("{0} ({1}) ({2})", searchResult.Snippet.Title.ToString(), searchResult.Id.VideoId.ToString(), searchResult.Snippet.Thumbnails.Default__.Url.ToString());
+
+                        YouTubeDto you = new YouTubeDto();
+                        you.Title = searchResult.Snippet.Title;
+                        you.VideoId = searchResult.Id.VideoId;
+                        you.Url = searchResult.Snippet.Thumbnails.Default__.Url;
+                        you.ChanelName = searchResult.Snippet.ChannelTitle;
+                        you.ChanelId = searchResult.Snippet.ChannelId;
+                        videos.Add(you);
+
+                        break;
+
+                        //case "youtube#channel":
+                        //    channels.Add(String.Format("{0} ({1})", searchResult.Snippet.Title, searchResult.Id.ChannelId));
+                        //    break;
+
+                        //case "youtube#playlist":
+                        //    playlists.Add(String.Format("{0} ({1})", searchResult.Snippet.Title, searchResult.Id.PlaylistId));
+                        //    break;
+                }
+            }
+            return videos;
+            //Console.WriteLine(String.Format("Videos:\n{0}\n", string.Join("\n", videos)));
+            //Console.WriteLine(String.Format("Channels:\n{0}\n", string.Join("\n", channels)));
+            //Console.WriteLine(String.Format("Playlists:\n{0}\n", string.Join("\n", playlists)));
+        }
+    }
+}

@@ -1,0 +1,10 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<!--
+https://go.microsoft.com/fwlink/?LinkID=208121. 
+-->
+<Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <PropertyGroup>
+    <_PublishTargetUrl>C:\Users\hp\OneDrive\Desktop\TradeWatchPublish</_PublishTargetUrl>
+    <History>False|2021-07-19T17:30:41.0732530Z;True|2021-07-15T22:17:58.9478609+05:00;True|2021-07-15T21:05:12.6570187+05:00;True|2021-07-15T18:20:19.8093043+05:00;True|2021-07-15T17:30:23.2663080+05:00;True|2021-07-15T16:47:37.7169664+05:00;True|2021-07-15T16:28:32.8204886+05:00;True|2021-07-15T16:13:27.8806970+05:00;True|2021-07-15T15:51:40.0769981+05:00;True|2021-07-15T15:29:44.3426764+05:00;True|2021-07-15T15:04:45.5490276+05:00;True|2021-07-14T19:52:59.8601216+05:00;True|2021-07-13T22:42:24.4537840+05:00;True|2021-07-13T22:39:02.0039788+05:00;True|2021-07-13T20:19:23.5705305+05:00;</History>
+  </PropertyGroup>
+</Project>

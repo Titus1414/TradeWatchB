@@ -1,0 +1,29 @@
+﻿using System;
+using System.Collections.Generic;
+
+#nullable disable
+
+namespace TradeWatchB.Models
+{
+    public partial class Login
+    {
+        public Login()
+        {
+            WatchLists = new HashSet<WatchList>();
+        }
+
+        public int Id { get; set; }
+        public string UniqueId { get; set; }
+        public string Name { get; set; }
+        public string Email { get; set; }
+        public string LoginFrom { get; set; }
+        public string PhoneNo { get; set; }
+        public string ReffralCode { get; set; }
+        public string Password { get; set; }
+        public string Image { get; set; }
+        public string Country { get; set; }
+        public bool? IsActive { get; set; }
+
+        public virtual ICollection<WatchList> WatchLists { get; set; }
+    }
+}

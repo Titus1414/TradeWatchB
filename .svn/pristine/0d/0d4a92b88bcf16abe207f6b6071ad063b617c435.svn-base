@@ -1,0 +1,398 @@
+﻿@inject TradeWatchB.Models.TradeWatchDBContext _context;
+@{
+    ViewData["Title"] = "Home Page";
+}
+
+<style>
+    #simpleinput {
+        background-color: #45474c;
+        color: #fff;
+    }
+</style>
+
+<br />
+<br />
+<br />
+<br />
+<div class="row">
+    <div class="col-12">
+        <div class="card">
+            <div class="card-body">
+                <h4 class="header-title mt-0">Currency</h4>
+
+                <form class="form-horizontal" method="post" action="~/Home/AddCurrency" enctype="multipart/form-data">
+                    @Html.AntiForgeryToken()
+                    <div class="row">
+                        <div class="col">
+                            @{
+                                var AllStored = _context.Exchanges.Where(a => a.IsActive == true).ToList();
+                            }
+                            <div class="form-group row">
+                                <label class="col-lg-2 col-form-label" for="simpleinput">Name</label>
+                                <div class="col-lg-4">
+                                    <input type="text" name="Name" class="form-control" id="simpleinput" placeholder="Name">
+                                </div>
+
+                                <label class="col-lg-2 col-form-label" for="simpleinput">Exchange Names</label>
+                                <div class="col-lg-4">
+                                    <select class="js-example-basic-single form-control" name="ExId" id="simpleinput">
+                                        @foreach (var item in AllStored)
+                                        {
+                                            <option value="@item.Id">@item.Name</option>
+                                        }
+                                    </select>
+                                </div>
+                            </div>
+                            <div class="form-group row">
+                                <label class="col-lg-2 col-form-label" for="simpleinput">Code</label>
+                                <div class="col-lg-4">
+                                    <input type="text" name="Code" class="form-control" id="simpleinput"
+                                           placeholder="Code LIKE : BTC-USD.CC">
+                                </div>
+
+                                <label class="col-lg-2 col-form-label" for="simpleinput">Exchange Code</label>
+                                <div class="col-lg-4">
+                                    <input type="text" name="FkCode" class="form-control" id="simpleinput" placeholder="Exchange">
+                                </div>
+                            </div>
+                        </div>
+
+                    </div>
+
+                    <br />
+
+                    <div class="row">
+                        <div class="col-md-1" style="margin-top: 2%;">
+                            <input type="submit" value="Submit" class="btn btn-info " />
+                        </div>
+                    </div>
+                </form>
+
+            </div> <!-- end card-body -->
+        </div> <!-- end card-->
+    </div><!-- end col -->
+</div>
+
+<div class="text-center">
+    <h1 class="display-4">Welcome</h1>
+    <p>Learn about <a href="https://docs.microsoft.com/aspnet/core">building Web apps with ASP.NET Core</a>.</p>
+</div>
+
+<button id="action-button-Forex">Forex News Api</button>
+<button id="action-button-Crypto">Crypto News Api</button>
+<button id="action-button">Stock News Api</button>
+
+<a asp-controller="Home" asp-action="Check"> EOD Check </a>
+
+<div id="info"></div>
+
+<small>Demo created by <a href="https://twitter.com/AurelioDeRosa">Aurelio De Rosa</a></small>
+<ul id="dta">
+    <li>asd</li>
+</ul>
+
+
+<input name="From" id="from" placeholder="From" />
+<input name="To" id="to" placeholder="To" />
+<input name="Cur" id="cur" placeholder="Money" />
+<button id="actionConvert">Click me to Convert!</button>
+<label id="Conversion" style="color:red"></label>
+
+
+
+<table id="datatable-buttons" class="table table-striped dt-responsive nowrap" style="width:1000px !important">
+    <thead>
+        <tr>
+            <th>Kilometer</th>
+            <th>Price</th>
+            @*<th>Action</th>*@
+        </tr>
+    </thead>
+
+    <tbody>
+
+
+        <tr>
+            <th>12</th>
+            <th>123</th>
+            @*<th>
+                    <a data-toggle="modal" data-target="#Edit_@item.DeliveryFairId" title="Edit" style="color:slategray"> <i data-feather="edit-3"></i></a>
+                    <a data-toggle="modal" data-target="#Remove_@item.DeliveryFairId" title="Remove"> <i style="color:red" data-feather="trash-2"></i></a>
+                </th>*@
+        </tr>
+
+    </tbody>
+</table>
+
+
+
+@*<script src="~/lib/jquery/dist/jquery.min.js"></script>*@
+@*<script src="~/lib/jquery/dist/jquery.js"></script>*@
+<script type="text/javascript">
+    $(document).ready(function () {
+
+
+
+        window.setInterval(function () { // Set interval for checking
+            debugger
+            var date = new Date(); // Create a Date object to find out what time it is
+            if ((date.getHours() === 15 && date.getMinutes() === 55) || (date.getHours() === 8 && date.getMinutes() === 0)) { // Check the time
+                // Do stuff
+                StkNews();
+                CrptNews();
+                FrxNews();
+
+            }
+        }, 60000);
+
+
+        function StkNews() {
+            debugger
+            $.ajax({
+                url: 'https://stocknewsapi.com/api/v1/category?section=alltickers&items=50',
+                data: {
+                    token: 'jzivipd0hze0h3ui9ynkr8ilhufpogexhbsoatdi'
+                },
+                type: 'GET',
+                error: function () {
+                    alert("An error had occurred");
+                },
+                success: function (data) {
+                    debugger
+
+                    $.ajax({
+
+                        data: JSON.stringify(data.data),
+                        url: '/api/News/StockNews',
+                        type: 'Post',
+                        dataType: 'json',
+                        contentType: 'application/json',
+                        error: function () {
+                            debugger
+                            alert("An error had occurred");
+                        },
+                        success: function () {
+                            alert('Ohhh');
+                        }
+                    });
+                    alert('Awesome !');
+                }
+            });
+        };
+
+        function CrptNews() {
+            $.ajax({
+                url: 'https://cryptonews-api.com/api/v1/category?section=alltickers&items=50',
+                data: {
+                    token: 'u7zfvoclshl7rv9hemmw86rluywjhafjpb9hitxh'
+                },
+                type: 'GET',
+                error: function () {
+                    alert("An error had occurred");
+                },
+                success: function (data) {
+                    debugger
+
+                    $.ajax({
+
+                        data: JSON.stringify(data.data),
+                        url: '/api/News/CryptoNews',
+                        type: 'Post',
+                        dataType: 'json',
+                        contentType: 'application/json',
+                        error: function () {
+                            debugger
+                            alert("An error had occurred");
+                        },
+                        success: function () {
+                            alert('Ohhh');
+                        }
+                    });
+                    alert('Awesome !');
+                }
+            });
+        };
+
+        function FrxNews() {
+            $.ajax({
+                url: 'https://forexnewsapi.com/api/v1/category?section=allcurrencypairs&items=50',
+                data: {
+                    token: 'jougxdqodasb7gn0furdnnbmgdijkyznqjezwo5n'
+                },
+                type: 'GET',
+                error: function () {
+                    alert("An error had occurred");
+                },
+                success: function (data) {
+                    debugger
+
+                    $.ajax({
+
+                        data: JSON.stringify(data.data),
+                        url: '/api/News/ForexkNews',
+                        type: 'Post',
+                        dataType: 'json',
+                        contentType: 'application/json',
+                        error: function () {
+                            debugger
+                            alert("An error had occurred");
+                        },
+                        success: function () {
+                            alert('Ohhh');
+                        }
+                    });
+                    alert('Awesome !');
+                }
+            });
+        };
+
+
+        //$("div").click(function () {
+        //    alert("Welcome to the start jQuery learn..!");
+        //});
+        //const xhr = new XMLHttpRequest();
+        //$.ajax({
+
+        //    type: 'Get',
+        //    url: 'http://api.marketstack.com/v1/eod?symbols=MSFT',
+        //    //url: 'http://localhost:44332/Home/Privacy',
+
+        //    data: {
+        //        access_key: '8de63d77d9a2c260ea8528fe1099ca2f'
+        //    },
+        //    //processData: false,
+        //    //contentType: false,
+        //    success: function (data) {
+        //        //$.each(data, function (i, data) {
+        //        //    $data.append('<li>aaaa</li>')
+        //        //});
+        //        alert("Wasdf..!");
+        //    }
+        //});
+
+        //  $.ajax({
+
+        //      url: 'http://api.marketstack.com/v1/eod?symbols=MSFT',
+        //      data: {
+        //          access_key: '8de63d77d9a2c260ea8528fe1099ca2f'
+        //      },
+        //      dataType: 'json',
+        //      success: function (apiResponse) {
+        //          debugger
+        //          if (Array.isArray(apiResponse['data'])) {
+        //              apiResponse['data'].forEach(stockData => {
+        //                  console.log('Ticker ${stockData['symbol']}'
+        //                      , 'has a day high of ${stockData['high']},'on ${ stockData['date']}');
+        //});
+        //          }
+        //      }
+        //  });
+
+
+        //$("#action-button").click(function () {
+        //    debugger
+        //    $.getJSON("http://api.marketstack.com/v1/eod?symbols=MSFT&access_key=8de63d77d9a2c260ea8528fe1099ca2f", function (data) {
+        //        // do something on success
+        //        alert('asdaa');
+        //    });
+        //});
+
+        $("#action-button").click(function () {
+
+        }
+        );
+
+        $("#action-button-Forex").click(function () {
+            $.ajax({
+                url: 'https://forexnewsapi.com/api/v1/category?section=allcurrencypairs&items=50',
+                data: {
+                    token: 'jougxdqodasb7gn0furdnnbmgdijkyznqjezwo5n'
+                },
+                type: 'GET',
+                error: function () {
+                    alert("An error had occurred");
+                },
+                success: function (data) {
+                    debugger
+
+                    $.ajax({
+
+                        data: JSON.stringify(data.data),
+                        url: '/api/News/ForexkNews',
+                        type: 'Post',
+                        dataType: 'json',
+                        contentType: 'application/json',
+                        error: function () {
+                            debugger
+                            alert("An error had occurred");
+                        },
+                        success: function () {
+                            alert('Ohhh');
+                        }
+                    });
+                    alert('Awesome !');
+                }
+            });
+        });
+
+        $("#action-button-Crypto").click(function () {
+
+            $.ajax({
+                url: 'https://cryptonews-api.com/api/v1/category?section=general&items=50',
+                data: {
+                    token: 'u7zfvoclshl7rv9hemmw86rluywjhafjpb9hitxh'
+                },
+                type: 'GET',
+                error: function () {
+                    alert("An error had occurred");
+                },
+                success: function (data) {
+                    debugger
+
+                    $.ajax({
+
+                        data: JSON.stringify(data.data),
+                        url: '/Home/Privacy',
+                        type: 'Post',
+                        dataType: 'json',
+                        contentType: 'application/json',
+                        error: function () {
+                            debugger
+                            alert("An error had occurred");
+                        },
+                        success: function () {
+                            alert('Ohhh');
+                        }
+                    });
+                    alert('Awesome !');
+                }
+            });
+        });
+
+        $("#actionConvert").click(function () {
+            debugger
+            var from = $('#from').val().toUpperCase();
+            var d = '_';
+            var to = $('#to').val().toUpperCase();
+            var ss = from + d + to;
+
+            $.ajax({
+                url: 'https://free.currconv.com/api/v6/convert?compact=ultra',
+                data: {
+                    apiKey: '17af86db3713331c737f',
+                    q: ss
+                },
+                type: 'GET',
+                error: function () {
+                    alert("An error had occurred");
+                },
+                success: function (data) {
+                    debugger
+                    var sd = data[ss] * $('#cur').val();
+                    document.getElementById("Conversion").innerHTML = to + ': ' + sd;
+                }
+            });
+        });
+
+    });
+</script>

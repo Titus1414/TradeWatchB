@@ -1,0 +1,19 @@
+﻿using System;
+using System.Collections.Generic;
+
+#nullable disable
+
+namespace TradeWatchB.Models
+{
+    public partial class Fqa
+    {
+        public int Id { get; set; }
+        public int? Cid { get; set; }
+        public string Title { get; set; }
+        public string Description { get; set; }
+        public string Files { get; set; }
+        public bool? IsActive { get; set; }
+
+        public virtual Currency CidNavigation { get; set; }
+    }
+}

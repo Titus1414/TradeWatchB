@@ -1,0 +1,683 @@
+﻿using EODHistoricalData.NET;
+using Microsoft.EntityFrameworkCore;
+using Nancy.Json;
+using Newtonsoft.Json;
+using Newtonsoft.Json.Linq;
+using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Net;
+using System.Threading.Tasks;
+using TradeWatchB.Models;
+using TradeWatchB.Models.DTO;
+
+namespace TradeWatchB.Services.EodService
+{
+    public class EodService : IEodService
+    {
+        private readonly String BASE_URI = "https://free.currconv.com/api/v6";
+        private readonly String EODBASE_URI = "https://eodhistoricaldata.com/api/real-time/";
+        private readonly String EODBASE_URI1 = "https://eodhistoricaldata.com/api/div/";
+        public readonly TradeWatchDBContext _context;
+        public static int ExId;
+        public EodService(TradeWatchDBContext context)
+        {
+            _context = context;
+
+        }
+        public Decimal GetCurrencyExchange(String localCurrency, String foreignCurrency)
+        {
+            var code = $"{localCurrency}_{foreignCurrency}";
+            var newRate = FetchSerializedData(code);
+            return newRate;
+        }
+        private Decimal FetchSerializedData(String code)
+        {
+            var key = "17af86db3713331c737f";
+            var url = $"{BASE_URI}/convert?compact=ultra?&q={code}&apiKey={key}";
+            var webClient = new WebClient();
+            var jsonData = String.Empty;
+
+            var conversionRate = 1.0m;
+            try
+            {
+                jsonData = webClient.DownloadString(url);
+                dynamic data = JObject.Parse(jsonData);
+                decimal se = data["results"][code]["val"];
+                conversionRate = se;
+            }
+            catch (Exception) { }
+
+            return conversionRate;
+        }
+        private List<RealTimePair> FetchSerializedEod(string[] code, string tbl)
+        {
+            string[] lst = code.ToArray();
+            string sd = string.Join(",", lst);
+            var key = ApiKeys.EodApiKey;
+            var url = $"{EODBASE_URI}{sd}?api_token={key}&fmt=json";
+            var webClient = new WebClient();
+            var jsonData = String.Empty;
+            List<RealTimePair> RealTimePair = new List<RealTimePair>();
+            try
+            {
+                jsonData = webClient.DownloadString(url).Replace("NA", "");
+                JavaScriptSerializer js = new JavaScriptSerializer();
+                RealTimePair[] prices = js.Deserialize<RealTimePair[]>(jsonData);
+                if (tbl == "NSE")
+                {
+                    foreach (var item in prices)
+                    {
+                        var sda = _context.NserealTimePairs.Where(a => a.Code == item.Code).FirstOrDefault();
+                        if (sda == null)
+                        {
+                            if (item.Code.Contains(".Us"))
+                            {
+
+                            }
+                            else
+                            {
+                                NserealTimePair real = new NserealTimePair();
+                                real.Change = item.Change == null ? 0 : item.Change;
+                                real.ChangeP = item.ChangeP == null ? 0 : item.ChangeP;
+                                real.Close = item.Close == null ? 0 : item.Close;
+                                real.Code = item.Code;
+                                real.High = item.High == null ? 0 : item.High;
+                                real.Gmtoffset = item.Gmtoffset == null ? 0 : item.Gmtoffset;
+                                real.Low = item.Low == null ? 0 : item.Low;
+                                real.Open = item.Open == null ? 0 : item.Open;
+                                real.PreviousClose = item.PreviousClose == null ? 0 : item.PreviousClose;
+                                real.Timestamp = item.Timestamp == null ? 0 : item.Timestamp;
+                                real.Volume = item.Volume == null ? 0 : item.Volume;
+                                if (sda == null)
+                                {
+                                    _context.NserealTimePairs.Add(real);
+                                }
+                            }
+                        }
+                        else
+                        {
+                            if (item.Code.Contains(".Us"))
+                            {
+
+                            }
+                            else
+                            {
+                                sda.Change = item.Change == null ? 0 : item.Change;
+                                sda.ChangeP = item.ChangeP == null ? 0 : item.ChangeP;
+                                sda.Close = item.Close == null ? 0 : item.Close;
+                                //sda.Code = item.Code;
+                                sda.High = item.High == null ? 0 : item.High;
+                                sda.Gmtoffset = item.Gmtoffset == null ? 0 : item.Gmtoffset;
+                                sda.Low = item.Low == null ? 0 : item.Low;
+                                sda.Open = item.Open == null ? 0 : item.Open;
+                                sda.PreviousClose = item.PreviousClose == null ? 0 : item.PreviousClose;
+                                sda.Timestamp = item.Timestamp == null ? 0 : item.Timestamp;
+                                sda.Volume = item.Volume == null ? 0 : item.Volume;
+                                _context.NserealTimePairs.Update(sda);
+                            }
+                        }
+                    }
+                }
+                if (tbl == "BSE")
+                {
+                    foreach (var item in prices)
+                    {
+                        var sda = _context.NserealTimePairs.Where(a => a.Code == item.Code).FirstOrDefault();
+                        if (sda == null)
+                        {
+                            if (item.Code.Contains(".Us"))
+                            {
+
+                            }
+                            else
+                            {
+                                NserealTimePair real = new NserealTimePair();
+                                real.Change = item.Change == null ? 0 : item.Change;
+                                real.ChangeP = item.ChangeP == null ? 0 : item.ChangeP;
+                                real.Close = item.Close == null ? 0 : item.Close;
+                                real.Code = item.Code;
+                                real.High = item.High == null ? 0 : item.High;
+                                real.Gmtoffset = item.Gmtoffset == null ? 0 : item.Gmtoffset;
+                                real.Low = item.Low == null ? 0 : item.Low;
+                                real.Open = item.Open == null ? 0 : item.Open;
+                                real.PreviousClose = item.PreviousClose == null ? 0 : item.PreviousClose;
+                                real.Timestamp = item.Timestamp == null ? 0 : item.Timestamp;
+                                real.Volume = item.Volume == null ? 0 : item.Volume;
+                                if (sda == null)
+                                {
+                                    _context.NserealTimePairs.Add(real);
+                                }
+                            }
+
+                        }
+                        else
+                        {
+                            if (item.Code.Contains(".Us"))
+                            {
+
+                            }
+                            else
+                            {
+                                sda.Change = item.Change == null ? 0 : item.Change;
+                                sda.ChangeP = item.ChangeP == null ? 0 : item.ChangeP;
+                                sda.Close = item.Close == null ? 0 : item.Close;
+                                //sda.Code = item.Code;
+                                sda.High = item.High == null ? 0 : item.High;
+                                sda.Gmtoffset = item.Gmtoffset == null ? 0 : item.Gmtoffset;
+                                sda.Low = item.Low == null ? 0 : item.Low;
+                                sda.Open = item.Open == null ? 0 : item.Open;
+                                sda.PreviousClose = item.PreviousClose == null ? 0 : item.PreviousClose;
+                                sda.Timestamp = item.Timestamp == null ? 0 : item.Timestamp;
+                                sda.Volume = item.Volume == null ? 0 : item.Volume;
+                                _context.NserealTimePairs.Update(sda);
+                            }
+                        }
+                    }
+                }
+                else if (tbl == "CC")
+                {
+                    foreach (var item in prices)
+                    {
+                        var sda = _context.CcrealTimePairs.Where(a => a.Code == item.Code).FirstOrDefault();
+                        if (sda == null)
+                        {
+                            CcrealTimePair real = new CcrealTimePair();
+                            real.Change = item.Change == null ? 0 : item.Change;
+                            real.ChangeP = item.ChangeP == null ? 0 : item.ChangeP;
+                            real.Close = item.Close == null ? 0 : item.Close;
+                            real.Code = item.Code;
+                            real.High = item.High == null ? 0 : item.High;
+                            real.Gmtoffset = item.Gmtoffset == null ? 0 : item.Gmtoffset;
+                            real.Low = item.Low == null ? 0 : item.Low;
+                            real.Open = item.Open == null ? 0 : item.Open;
+                            real.PreviousClose = item.PreviousClose == null ? 0 : item.PreviousClose;
+                            real.Timestamp = item.Timestamp == null ? 0 : item.Timestamp;
+                            real.Volume = item.Volume == null ? 0 : item.Volume;
+                            if (sda == null)
+                            {
+                                _context.CcrealTimePairs.Add(real);
+                            }
+                        }
+                        else
+                        {
+                            sda.Change = item.Change == null ? 0 : item.Change;
+                            sda.ChangeP = item.ChangeP == null ? 0 : item.ChangeP;
+                            sda.Close = item.Close == null ? 0 : item.Close;
+                            //sda.Code = item.Code;
+                            sda.High = item.High == null ? 0 : item.High;
+                            sda.Gmtoffset = item.Gmtoffset == null ? 0 : item.Gmtoffset;
+                            sda.Low = item.Low == null ? 0 : item.Low;
+                            sda.Open = item.Open == null ? 0 : item.Open;
+                            sda.PreviousClose = item.PreviousClose == null ? 0 : item.PreviousClose;
+                            sda.Timestamp = item.Timestamp == null ? 0 : item.Timestamp;
+                            sda.Volume = item.Volume == null ? 0 : item.Volume;
+                            _context.CcrealTimePairs.Update(sda);
+                        }
+                    }
+                }
+                else if (tbl == "Forex")
+                {
+                    foreach (var item in prices)
+                    {
+                        var sda = _context.ForexRealTimePairs.Where(a => a.Code == item.Code).FirstOrDefault();
+                        if (sda == null)
+                        {
+                            ForexRealTimePair real = new ForexRealTimePair();
+                            real.Change = item.Change == null ? 0 : item.Change;
+                            real.ChangeP = item.ChangeP == null ? 0 : item.ChangeP;
+                            real.Close = item.Close == null ? 0 : item.Close;
+                            real.Code = item.Code;
+                            real.High = item.High == null ? 0 : item.High;
+                            real.Gmtoffset = item.Gmtoffset == null ? 0 : item.Gmtoffset;
+                            real.Low = item.Low == null ? 0 : item.Low;
+                            real.Open = item.Open == null ? 0 : item.Open;
+                            real.PreviousClose = item.PreviousClose == null ? 0 : item.PreviousClose;
+                            real.Timestamp = item.Timestamp == null ? 0 : item.Timestamp;
+                            real.Volume = item.Volume == null ? 0 : item.Volume;
+                            if (sda == null)
+                            {
+                                _context.ForexRealTimePairs.Add(real);
+                            }
+                        }
+                        else
+                        {
+                            sda.Change = item.Change == null ? 0 : item.Change;
+                            sda.ChangeP = item.ChangeP == null ? 0 : item.ChangeP;
+                            sda.Close = item.Close == null ? 0 : item.Close;
+                            //sda.Code = item.Code;
+                            sda.High = item.High == null ? 0 : item.High;
+                            sda.Gmtoffset = item.Gmtoffset == null ? 0 : item.Gmtoffset;
+                            sda.Low = item.Low == null ? 0 : item.Low;
+                            sda.Open = item.Open == null ? 0 : item.Open;
+                            sda.PreviousClose = item.PreviousClose == null ? 0 : item.PreviousClose;
+                            sda.Timestamp = item.Timestamp == null ? 0 : item.Timestamp;
+                            sda.Volume = item.Volume == null ? 0 : item.Volume;
+                            _context.ForexRealTimePairs.Update(sda);
+                        }
+                    }
+                }
+                else if (tbl == "Comm")
+                {
+                    foreach (var item in prices)
+                    {
+                        var sda = _context.CommRealTimePairs.Where(a => a.Code == item.Code).FirstOrDefault();
+                        if (sda == null)
+                        {
+                            CommRealTimePair real = new CommRealTimePair();
+                            real.Change = item.Change == null ? 0 : item.Change;
+                            real.ChangeP = item.ChangeP == null ? 0 : item.ChangeP;
+                            real.Close = item.Close == null ? 0 : item.Close;
+                            real.Code = item.Code;
+                            real.High = item.High == null ? 0 : item.High;
+                            real.Gmtoffset = item.Gmtoffset == null ? 0 : item.Gmtoffset;
+                            real.Low = item.Low == null ? 0 : item.Low;
+                            real.Open = item.Open == null ? 0 : item.Open;
+                            real.PreviousClose = item.PreviousClose == null ? 0 : item.PreviousClose;
+                            real.Timestamp = item.Timestamp == null ? 0 : item.Timestamp;
+                            real.Volume = item.Volume == null ? 0 : item.Volume;
+                            if (sda == null)
+                            {
+                                _context.CommRealTimePairs.Add(real);
+                            }
+                        }
+                        else
+                        {
+                            sda.Change = item.Change == null ? 0 : item.Change;
+                            sda.ChangeP = item.ChangeP == null ? 0 : item.ChangeP;
+                            sda.Close = item.Close == null ? 0 : item.Close;
+                            //sda.Code = item.Code;
+                            sda.High = item.High == null ? 0 : item.High;
+                            sda.Gmtoffset = item.Gmtoffset == null ? 0 : item.Gmtoffset;
+                            sda.Low = item.Low == null ? 0 : item.Low;
+                            sda.Open = item.Open == null ? 0 : item.Open;
+                            sda.PreviousClose = item.PreviousClose == null ? 0 : item.PreviousClose;
+                            sda.Timestamp = item.Timestamp == null ? 0 : item.Timestamp;
+                            sda.Volume = item.Volume == null ? 0 : item.Volume;
+                            _context.CommRealTimePairs.Update(sda);
+                        }
+                    }
+                }
+                _context.SaveChanges();
+            }
+            catch (Exception ex)
+            {
+                var sds = ex.Message;
+            }
+
+            return RealTimePair;
+        }
+        private List<DividendsDto> FetchSerializedDividends(string code, DateTime start)
+        {
+            string lst = code;
+            var key = ApiKeys.EodApiKey;
+            var url = $"{EODBASE_URI1}{lst}?api_token={key}&from={start.ToString("yyyy-MM-dd")}&fmt=json";
+            var webClient = new WebClient();
+            var jsonData = String.Empty;
+            List<DividendsDto> RealTimePair = new List<DividendsDto>();
+            try
+            {
+                jsonData = webClient.DownloadString(url).Replace("NA", "");
+                JavaScriptSerializer js = new JavaScriptSerializer();
+                DividendsDto[] prices = js.Deserialize<DividendsDto[]>(jsonData);
+                foreach (var item in prices)
+                {
+                    RealTimePair.Add(item);
+                }
+            }
+            catch (Exception ex)
+            {
+                var sds = ex.Message;
+            }
+
+            return RealTimePair;
+        }
+        private float FetchSerializedMarketCap(string code, DateTime start, DateTime end)
+        {
+            float val = 0;
+            string lst = code;
+            var key = ApiKeys.EodApiKey;
+            var url = $"{"https://eodhistoricaldata.com/api/fundamentals/"}{lst}?api_token={key}&filter=outstandingShares::quarterly";
+            var url1 = $"{"https://eodhistoricaldata.com/api/eod/"}{lst}?api_token={key}&order=d&from={start.ToString("yyyy-MM-dd")}&to={end.ToString("yyyy-MM-dd")}&fmt=json";
+            var webClient = new WebClient();
+            var jsonData = String.Empty;
+            var jsonData1 = String.Empty;
+            List<DividendsDto> RealTimePair = new List<DividendsDto>();
+            try
+            {
+                jsonData = webClient.DownloadString(url).Replace("NA", "");
+                jsonData1 = webClient.DownloadString(url1).Replace("NA", "");
+
+                JavaScriptSerializer js = new JavaScriptSerializer();
+                var prices = js.Deserialize<dynamic>(jsonData);
+                float sdt = prices[0].shares;
+                CloseVal[] prices1 = js.Deserialize<CloseVal[]>(jsonData1);
+                CloseVal close = prices1.FirstOrDefault();
+                if (close != null)
+                {
+                    val = sdt * close.adjusted_close;
+                }
+                
+            }
+            catch (Exception ex)
+            {
+                var sds = ex.Message;
+            }
+            return val;
+        }
+        private List<dynamic> FetchSerializedHistory(string code)
+        {
+            float val = 0;
+            string lst = code;
+            var key = ApiKeys.EodApiKey;
+            var url = $"{"https://eodhistoricaldata.com/api/intraday/"}{lst}?api_token={key}&fmt=json";
+            var webClient = new WebClient();
+            var jsonData = String.Empty;
+            List<IntraDayDto> RealTimePair = new List<IntraDayDto>();
+            try
+            {
+                jsonData = webClient.DownloadString(url).Replace("null", "0");
+                JavaScriptSerializer js = new JavaScriptSerializer();
+                List<dynamic> prices = js.Deserialize<List<dynamic>>(jsonData);
+                return prices;
+            }
+            catch (Exception ex)
+            {
+                var sds = ex.Message;
+            }
+           return null;
+        }
+        public async Task<List<AllCurrency>> AllCurrencies()
+        {
+            try
+            {
+                var dt = _context.AllCurrencies.ToList();
+                return dt;
+            }
+            catch (Exception)
+            {
+
+                throw;
+            }
+        }
+        public async Task<List<Currency>> GetCodes()
+        {
+            try
+            {
+                var dt = _context.Currencies.Where(a => a.FkCode != "").ToList();
+                return dt;
+            }
+            catch (Exception)
+            {
+
+                throw;
+            }
+        }
+        public async Task<List<Exchange>> GetExchanges()
+        {
+            var data = _context.Exchanges.Where(a => a.Currency == "Unknown" && a.IsActive == true).OrderBy(a => a.Orderby).ToList();
+            return data;
+        }
+        public async Task<Tuple<List<HistoricalPrice>, List<DividendsDto>, float>> GetHistoricalPairs(string TimePeriod, int StkId, int PairId, string curr)
+        {
+            try
+            {
+                var stk = _context.Currencies.Where(a => a.Id == PairId).FirstOrDefault();
+                var pair = _context.Exchanges.Where(w => w.Id == StkId).FirstOrDefault();
+                decimal vl = GetCurrencyExchange("USD", curr);
+                var dt = _context.Exchanges.Where(a => a.Id == stk.ExId).FirstOrDefault();
+                if (stk.FkCode == "" || stk.FkCode == ".")
+                {
+                    stk.FkCode = dt.Code;
+                }
+                DateTime str = DateTime.Now;
+                DateTime end = DateTime.Now;
+
+                if (TimePeriod == "Week")
+                {
+                    DateTime sd = DateTime.Now.AddDays(-7);
+                    end = sd;
+                }
+                else if (TimePeriod == "Month")
+                {
+                    DateTime sd = DateTime.Now.AddMonths(-1);
+                    end = sd;
+                }
+                else if (TimePeriod == "Year")
+                {
+                    DateTime sd = DateTime.Now.AddYears(-1);
+                    end = sd;
+                }
+
+                else if (TimePeriod == "Quater")
+                {
+                    DateTime sd = DateTime.Now.AddMonths(-3);
+                    end = sd;
+                }
+                else if (TimePeriod == "Ytd")
+                {
+                    DateTime sd = new DateTime(DateTime.Now.Year, 1, 1);
+                    end = sd;
+                }
+                else if (TimePeriod == "Day")
+                {
+                    List<dynamic> prices = FetchSerializedHistory(stk.Code+'.'+ stk.FkCode);
+                    List<HistoricalPrice> History = new List<HistoricalPrice>();
+                    int pr = 0;
+                    int tk = 0;
+                    if (prices != null)
+                    {
+                        if (prices.Count > 30)
+                        {
+                            pr = prices.Count - 30;
+                            tk = 30;
+                        }
+                        else
+                        {
+                            pr = prices.Count;
+                            tk = pr;
+                        }
+                        var sdo = prices.Skip(pr).Take(tk);
+                        
+                        int inx = 0;
+                        foreach (var item in sdo)
+                        {
+                            HistoricalPrice sd = new HistoricalPrice();
+                            sd.Close = item.close * (float)vl;
+                            sd.High = item.high * (float)vl;
+                            sd.Low = item.low * (float)vl;
+                            sd.Date = DateTime.Now;
+                            sd.AdjustedClose = 0;
+                            sd.Volume = 0;
+                            History.Insert(inx, sd);
+                            inx++;
+                        }
+                        foreach (var item in sdo)
+                        {
+                            item.close = item.close * (float)vl;
+
+                        }
+                    }
+
+                    var dividends = FetchSerializedDividends(stk.Code + '.' + dt.Code, end);
+                    float share = 0;
+                    if (pair.Id != 21 && pair.Id != 23 && pair.Id != 38)
+                    {
+                        share = FetchSerializedMarketCap(stk.Code + '.' + stk.FkCode, end, str);
+                        share = share * (float)vl;
+                    }
+                    
+                    
+                    return new Tuple<List<HistoricalPrice>, List<DividendsDto>, float>(History, dividends, share);
+                }
+                if(TimePeriod != "Day")
+                {
+                    EODHistoricalDataClient client = new EODHistoricalDataClient(ApiKeys.EodApiKey, true);
+
+                    List<HistoricalPrice> prices = client.GetHistoricalPrices(stk.Code + '.' + stk.FkCode, end, str);
+                    var dividends = FetchSerializedDividends(stk.Code + '.' + dt.Code, end);
+                    float share = FetchSerializedMarketCap(stk.Code + '.' + stk.FkCode, end, str);
+
+                    foreach (var item in prices)
+                    {
+                        item.Close = item.Close * (double)vl;
+                    }
+                    return new Tuple<List<HistoricalPrice>, List<DividendsDto>, float>(prices, dividends, share);
+                }
+                return null;
+            }
+            catch (Exception ex)
+            {
+
+                throw;
+            }
+        }
+        private void RemovesDuplicates()
+        {
+            //Commodities
+            var dtComm = _context.CommRealTimePairs.ToList();
+            var query = dtComm.GroupBy(x => x.Code)
+              .Where(g => g.Count() > 1)
+              .Select(y => y.Key)
+              .ToList();
+            foreach (var item in query)
+            {
+                var dt = _context.CommRealTimePairs.Where(s => s.Code == item).FirstOrDefault();
+                _context.CommRealTimePairs.Remove(dt);
+                _context.SaveChanges();
+            }
+            //Stocks
+            var dtComm1 = _context.NserealTimePairs.ToList();
+            var query1 = dtComm1.GroupBy(x => x.Code)
+              .Where(g => g.Count() > 1)
+              .Select(y => y.Key)
+              .ToList();
+            foreach (var item in query1)
+            {
+                var dt = _context.NserealTimePairs.Where(s => s.Code == item).FirstOrDefault();
+                _context.NserealTimePairs.Remove(dt);
+                _context.SaveChanges();
+            }
+            //Crypto
+            var dtComm11 = _context.CcrealTimePairs.ToList();
+            var query11 = dtComm11.GroupBy(x => x.Code)
+              .Where(g => g.Count() > 1)
+              .Select(y => y.Key)
+              .ToList();
+            foreach (var item in query11)
+            {
+                var dt = _context.CcrealTimePairs.Where(s => s.Code == item).FirstOrDefault();
+                _context.CcrealTimePairs.Remove(dt);
+                _context.SaveChanges();
+            }
+            //Crypto
+            var dtComm121 = _context.ForexRealTimePairs.ToList();
+            var query121 = dtComm121.GroupBy(x => x.Code)
+              .Where(g => g.Count() > 1)
+              .Select(y => y.Key)
+              .ToList();
+            foreach (var item in query121)
+            {
+                var dt = _context.ForexRealTimePairs.Where(s => s.Code == item).FirstOrDefault();
+                _context.ForexRealTimePairs.Remove(dt);
+                _context.SaveChanges();
+            }
+        }
+        public async Task<string> GetRealTimePairs()
+        {
+            RemovesDuplicates();
+            //Commodities
+            var list = await _context.Currencies.Where(a => a.ExId == 21).OrderBy(a => a.Id).Select(s => s.Code + '.' + s.FkCode).ToListAsync();
+            FetchSerializedEod(list.ToArray(), "Comm");
+            //NSE
+            var list1 = await _context.Currencies.Where(a => a.ExId == 5).OrderBy(a => a.Id).Select(s => s.Code + ".NSE").Take(500).ToListAsync();
+            FetchSerializedEod(list1.ToArray(), "NSE");
+            var list2 = await _context.Currencies.Where(a => a.ExId == 5).OrderBy(a => a.Id).Select(s => s.Code + ".NSE").Skip(500).Take(500).ToListAsync();
+            FetchSerializedEod(list2.ToArray(), "NSE");
+            var list3 = await _context.Currencies.Where(a => a.ExId == 5).OrderBy(a => a.Id).Select(s => s.Code + ".NSE").Skip(1000).Take(500).ToListAsync();
+            FetchSerializedEod(list3.ToArray(), "NSE");
+            var list4 = await _context.Currencies.Where(a => a.ExId == 5).OrderBy(a => a.Id).Select(s => s.Code + ".NSE").Skip(1500).Take(239).ToListAsync();
+            FetchSerializedEod(list4.ToArray(), "NSE");
+            //BSE
+            var list5 = await _context.Currencies.Where(a => a.ExId == 14).OrderBy(a => a.Id).Select(s => s.Code + ".BSE").Take(500).ToListAsync();
+            FetchSerializedEod(list5.ToArray(), "BSE");
+            var list6 = await _context.Currencies.Where(a => a.ExId == 14).OrderBy(a => a.Id).Select(s => s.Code + ".BSE").Skip(500).Take(500).ToListAsync();
+            FetchSerializedEod(list6.ToArray(), "BSE");
+            var list7 = await _context.Currencies.Where(a => a.ExId == 14).OrderBy(a => a.Id).Select(s => s.Code + ".BSE").Skip(1000).Take(500).ToListAsync();
+            FetchSerializedEod(list7.ToArray(), "BSE");
+            var list8 = await _context.Currencies.Where(a => a.ExId == 14).OrderBy(a => a.Id).Select(s => s.Code + ".BSE").Skip(1500).Take(500).ToListAsync();
+            FetchSerializedEod(list8.ToArray(), "BSE");
+            var list9 = await _context.Currencies.Where(a => a.ExId == 14).OrderBy(a => a.Id).Select(s => s.Code + ".BSE").Skip(2000).Take(500).ToListAsync();
+            FetchSerializedEod(list9.ToArray(), "BSE");
+            var list10 = await _context.Currencies.Where(a => a.ExId == 14).OrderBy(a => a.Id).Select(s => s.Code + ".BSE").Skip(2500).Take(438).ToListAsync();
+            FetchSerializedEod(list10.ToArray(), "BSE");
+            //Crypto
+            var list11 = await _context.Currencies.Where(a => a.ExId == 23).OrderBy(a => a.Id).Select(s => s.Code + '.' + s.FkCode).Take(500).ToListAsync();
+            FetchSerializedEod(list11.ToArray(), "CC");
+            var list12 = await _context.Currencies.Where(a => a.ExId == 23).OrderBy(a => a.Id).Select(s => s.Code + '.' + s.FkCode).Skip(500).Take(500).ToListAsync();
+            FetchSerializedEod(list12.ToArray(), "CC");
+            var list13 = await _context.Currencies.Where(a => a.ExId == 23).OrderBy(a => a.Id).Select(s => s.Code + '.' + s.FkCode).Skip(1000).Take(500).ToListAsync();
+            FetchSerializedEod(list13.ToArray(), "CC");
+            var list14 = await _context.Currencies.Where(a => a.ExId == 23).OrderBy(a => a.Id).Select(s => s.Code + '.' + s.FkCode).Skip(1500).Take(500).ToListAsync();
+            FetchSerializedEod(list14.ToArray(), "CC");
+            var list15 = await _context.Currencies.Where(a => a.ExId == 23).OrderBy(a => a.Id).Select(s => s.Code + '.' + s.FkCode).Skip(2000).Take(500).ToListAsync();
+            FetchSerializedEod(list15.ToArray(), "CC");
+            var list16 = await _context.Currencies.Where(a => a.ExId == 23).OrderBy(a => a.Id).Select(s => s.Code + '.' + s.FkCode).Skip(2500).Take(500).ToListAsync();
+            FetchSerializedEod(list16.ToArray(), "CC");
+            var list17 = await _context.Currencies.Where(a => a.ExId == 23).OrderBy(a => a.Id).Select(s => s.Code + '.' + s.FkCode).Skip(3000).Take(500).ToListAsync();
+            FetchSerializedEod(list17.ToArray(), "CC");
+            var list18 = await _context.Currencies.Where(a => a.ExId == 23).OrderBy(a => a.Id).Select(s => s.Code + '.' + s.FkCode).Skip(3500).Take(500).ToListAsync();
+            FetchSerializedEod(list18.ToArray(), "CC");
+            var list19 = await _context.Currencies.Where(a => a.ExId == 23).OrderBy(a => a.Id).Select(s => s.Code + '.' + s.FkCode).Skip(4000).Take(500).ToListAsync();
+            FetchSerializedEod(list19.ToArray(), "CC");
+            var list20 = await _context.Currencies.Where(a => a.ExId == 23).OrderBy(a => a.Id).Select(s => s.Code + '.' + s.FkCode).Skip(4500).Take(102).ToListAsync();
+            FetchSerializedEod(list20.ToArray(), "CC");
+            //Forex
+            var list21 = await _context.Currencies.Where(a => a.ExId == 38).OrderBy(a => a.Id).Select(s => s.Code + '.' + s.FkCode).Take(500).ToListAsync();
+            FetchSerializedEod(list21.ToArray(), "Forex");
+            var list22 = await _context.Currencies.Where(a => a.ExId == 38).OrderBy(a => a.Id).Select(s => s.Code + '.' + s.FkCode).Skip(500).Take(443).ToListAsync();
+            FetchSerializedEod(list22.ToArray(), "Forex");
+            RemovesDuplicates();
+
+            return "";
+        }
+        public async Task<List<Currency>> GetStockPairs(int id)
+        {
+            var dt = from t1 in _context.Exchanges
+                     join t2 in _context.Currencies on t1.Id equals t2.ExId
+                     where t2.ExId == id
+                     select (t2);
+            return dt.ToList();
+        }
+        public Task<int> GetId(int id)
+        {
+            var dt = _context.Currencies.Where(a => a.Id == id).FirstOrDefault();
+            var ex = _context.Exchanges.Where(a => a.Name == dt.Name && a.Code == dt.Code).FirstOrDefault();
+            var cd = _context.Exchanges.Where(a => a.Id == ex.Id).FirstOrDefault();
+            int ss = cd.Id;
+            ExId = ss;
+
+            return null;
+        }
+        public async Task<List<NserealTimePair>> NseRealTimePair()
+        {
+            var dt = _context.NserealTimePairs.OrderByDescending(w => w.Change).Take(10).ToList();
+            return dt;
+        }
+        public async Task<List<CcrealTimePair>> CcRealTimePair()
+        {
+            var dt = _context.CcrealTimePairs.OrderByDescending(w => w.Change).Take(10).ToList();
+            return dt;
+        }
+        public async Task<List<ForexRealTimePair>> ForexRealTimePair()
+        {
+            var dt = _context.ForexRealTimePairs.OrderByDescending(w => w.Change).Take(10).ToList();
+            return dt;
+        }
+        public async Task<List<CommRealTimePair>> CommRealTimePair()
+        {
+            var dt = _context.CommRealTimePairs.OrderByDescending(w => w.Change).Take(10).ToList();
+            return dt;
+        }
+    }
+}

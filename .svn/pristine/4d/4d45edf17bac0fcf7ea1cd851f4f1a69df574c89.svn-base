@@ -1,0 +1,12 @@
+﻿@{ 
+    Layout = null;
+}
+
+<div class="container-fluid">
+    <div style="font-display:block; align-content:center">
+        <h2>Thank You</h2>
+        <h3>
+            We have reseted your password !
+        </h3>
+    </div>
+</div>

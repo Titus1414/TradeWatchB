@@ -1,0 +1,80 @@
+﻿@{
+    Layout = null;
+}
+
+<link href="https://fonts.googleapis.com/css?family=Lato:300,400,700&amp;display=swap" rel="stylesheet">
+<link href="~/Login/A.style.css.pagespeed.cf.myDvv9zPc8.css" rel="stylesheet" />
+<link href="~/Login/font-awesome.min.css" rel="stylesheet" />
+
+<section class="ftco-section">
+    <div class="container">
+        <div class="row justify-content-center">
+            <div class="col-md-6 col-lg-4">
+                <div class="login-wrap py-5">
+                    <div class="img d-flex align-items-center justify-content-center" style="background-image: url(~/images/Logo.png)"></div>
+                    <h3 class="text-center mb-0">Welcome</h3>
+                    <p class="text-center">Sign in by entering the information below</p>
+                    <form method="post" action="~/Home/Login" enctype="multipart/form-data" class="login-form">
+                        <div class="form-group">
+                            <div class="icon d-flex align-items-center justify-content-center"><span class="fa fa-user"></span></div>
+                            <input type="text" name="Name" class="form-control" placeholder="Username" required>
+                        </div>
+                        <div class="form-group">
+                            <div class="icon d-flex align-items-center justify-content-center"><span class="fa fa-lock"></span></div>
+                            <input type="password" name="Pass" class="form-control" placeholder="Password" required>
+                        </div>
+                        <div class="form-group d-md-flex">
+                            <div class="w-100 text-md-right">
+                                <a href="#">Forgot Password</a>
+                            </div>
+                        </div>
+                        <div class="form-group">
+                            <button type="submit" class="btn form-control btn-primary rounded submit px-3">Get Started</button>
+                        </div>
+                    </form>
+                    <div class="w-100 text-center mt-4 text">
+                        <p class="mb-0">Don't have an account?</p>
+                        <a href="#">Sign Up</a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+@*<style>
+        #simpleinput {
+            background-color: #45474c;
+            color: #fff;
+        }
+    </style>*@
+
+@*<div class="login-page">
+        <form class="form-vertical" method="post" action="~/Home/Login" enctype="multipart/form-data">
+            <div class="form-group row">
+                <label class="col-lg-2 col-form-label" for="simpleinput">User Name</label>
+                <div class="col-lg-4">
+                    <input type="text" name="Name" class="form-control" id="simpleinput" placeholder="User Name">
+                </div>
+
+                <label class="col-lg-2 col-form-label" for="simpleinput">Password</label>
+                <div class="col-lg-4">
+                    <input type="password" name="Pass" class="form-control" id="simpleinput" placeholder="Password">
+                </div>
+            </div>
+
+            <br />
+
+            <div class="row">
+                <div class="col-md-1" style="margin-top: 2%;">
+                    <input type="submit" value="Submit" class="btn btn-info " />
+                </div>
+            </div>
+        </form>
+    </div>*@
+
+<script src="~/Login/JS/jquery.min.js"></script>
+<script src="~/Login/JS/popper.js+bootstrap.min.js+main.js.pagespeed.jc.wQFdmSVNjP.js"></script>
+<script>eval(mod_pagespeed_hIoZOxWKES);</script>
+<script>eval(mod_pagespeed_ci75Ifz6eT);</script>
+<script src="~/Login/JS/beacon.min.js"></script>

@@ -1,0 +1,108 @@
+﻿using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Threading.Tasks;
+using TradeWatchB.Models;
+using TradeWatchB.Models.DTO;
+
+namespace TradeWatchB.Services.WatchListService
+{
+    public class WatchListService : IWatchListService
+    {
+        public readonly TradeWatchDBContext _context;
+        public WatchListService(TradeWatchDBContext context)
+        {
+            _context = context;
+        }
+        public async Task<List<CcrealTimePair>> Crypto()
+        {
+            var dt = _context.CcrealTimePairs.OrderByDescending(w => w.Change).ToList();
+            return dt;
+        }
+        public async Task<List<CcrealTimePair>> Comm()
+        {
+            var dt = _context.CcrealTimePairs.OrderByDescending(w => w.Change).ToList();
+            return dt;
+        }
+        public async Task<List<ForexRealTimePair>> Forex()
+        {
+
+            //var dt = (from t1 in _context.ForexRealTimePairs
+            //         join t2 in _context.WatchLists on t1.Id equals t2.Forexid into g
+            //         from t2 in g.DefaultIfEmpty()
+            //         orderby t2.Uid descending
+            //         select new { t1.Change,t1.ChangeP,t1.Close,t1.Code,t1.Gmtoffset,t1.High,t1.Id,t1.Low,t1.Open,t1.PreviousClose,t1.Timestamp,t1.Volume,t2.Uid,t2.Forexid,t2.Stkid,t2.Ccid}).ToList();
+            //return null;
+
+            var dt = _context.ForexRealTimePairs.OrderByDescending(w => w.Change).ToList();
+            return dt;
+        }
+
+        public async Task<string> SetFav(int uid, int PairId, string tbl, bool like)
+        {
+            try
+            {
+                if (like == false)
+                {
+                    if (tbl == "crypto")
+                    {
+                        var dt = _context.WatchLists.Where(a => a.Uid == uid && a.Ccid == PairId).FirstOrDefault();
+                        _context.WatchLists.Remove(dt);
+                    }
+                    else if (tbl == "forex")
+                    {
+                        var dt = _context.WatchLists.Where(a => a.Uid == uid && a.Forexid == PairId).FirstOrDefault();
+                        _context.WatchLists.Remove(dt);
+                    }
+                    else if (tbl == "stock")
+                    {
+                        var dt  = _context.WatchLists.Where(a => a.Uid == uid && a.Stkid == PairId).FirstOrDefault();
+                        _context.WatchLists.Remove(dt);
+                    }
+                    else if (tbl == "comm")
+                    {
+                        var dt = _context.WatchLists.Where(a => a.Uid == uid && a.CommId == PairId).FirstOrDefault();
+                        _context.WatchLists.Remove(dt);
+                    }
+                    _context.SaveChanges();
+                    return "Success";
+                }
+                else
+                {
+                    WatchList watchList = new WatchList();
+                    watchList.Uid = uid;
+                    if (tbl == "crypto")
+                    {
+                        watchList.Ccid = PairId;
+                    }
+                    else if (tbl == "forex")
+                    {
+                        watchList.Forexid = PairId;
+                    }
+                    else if (tbl == "stock")
+                    {
+                        watchList.Stkid = PairId;
+                    }
+                    else if (tbl == "comm")
+                    {
+                        watchList.CommId = PairId;
+                    }
+                    watchList.IsLike = like;
+                    _context.WatchLists.Add(watchList);
+                    _context.SaveChanges();
+                }
+                return "Success";
+            }
+            catch (Exception ex)
+            {
+                return ex.Message;
+            }
+        }
+
+        public async Task<List<NserealTimePair>> Stocks()
+        {
+            var dt = _context.NserealTimePairs.OrderByDescending(w => w.Change).ToList();
+            return dt;
+        }
+    }
+}

@@ -1,0 +1,155 @@
+﻿using Microsoft.AspNetCore.Http;
+using Microsoft.AspNetCore.Mvc;
+using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Security.Claims;
+using System.Threading.Tasks;
+using TradeWatchB.Models;
+using TradeWatchB.Models.DTO;
+using TradeWatchB.Services.WatchListService;
+
+namespace TradeWatchB.Controllers
+{
+    [Route("api/[controller]")]
+    [ApiController]
+    public class WatchListController : ControllerBase
+    {
+        private readonly IWatchListService _watchListService;
+        private readonly TradeWatchDBContext _context;
+        public WatchListController(IWatchListService watchListService, TradeWatchDBContext context)
+        {
+            _watchListService = watchListService;
+            _context = context;
+        }
+        [HttpGet]
+        [Route("GetCryptoWatchList")]
+        public async Task<IActionResult> GetCryptoWatchList()
+        {
+            try
+            {
+                var identity = User.Identity as ClaimsIdentity;
+                if (identity != null)
+                {
+                    IEnumerable<Claim> claims = identity.Claims;
+                    var name = claims.Where(p => p.Type == "ID").FirstOrDefault()?.Value;
+                    var dt = from t1 in _context.CcrealTimePairs
+                             join t2 in _context.WatchLists on t1.Id equals t2.Ccid into g
+                             from t2 in g.DefaultIfEmpty()
+                             where t2.Uid == Convert.ToInt32(name) || t2.Uid == null
+                             orderby t2.Uid descending
+                             select new { t1.Change, t1.Close, t1.Code, t1.Gmtoffset, t1.High, t1.Id, t1.Low, t1.Open, t1.PreviousClose, t1.Timestamp, t1.Volume, LikeValue = t2.IsLike.ToString() ?? "" };
+                    dt.ToList();
+                    return Ok(new { res = dt });
+                }
+                return BadRequest();
+            }
+            catch (Exception)
+            {
+                throw;
+            }
+            
+        }
+        [HttpGet]
+        [Route("GetForexWatchList")]
+        public async Task<IActionResult> GetForexWatchList()
+        {
+            try
+            {
+                var identity = User.Identity as ClaimsIdentity;
+                if (identity != null)
+                {
+                    IEnumerable<Claim> claims = identity.Claims;
+                    var name = claims.Where(p => p.Type == "ID").FirstOrDefault()?.Value;
+                    var dt = from t1 in _context.ForexRealTimePairs
+                              join t2 in _context.WatchLists on t1.Id equals t2.Forexid into g
+                              from t2 in g.DefaultIfEmpty()
+                              where t2.Uid == Convert.ToInt32(name) || t2.Uid == null
+                              orderby t2.Uid descending
+                              select new { t1.Change, t1.Close, t1.Code, t1.Gmtoffset, t1.High, t1.Id, t1.Low, t1.Open, t1.PreviousClose, t1.Timestamp, t1.Volume, LikeValue = t2.IsLike.ToString() ?? "" };
+                    dt.ToList();
+                    return Ok(new { res = dt });
+                }
+                return BadRequest();
+            }
+            catch (Exception ex)
+            {
+                throw;
+            }
+
+        }
+        [HttpGet]
+        [Route("GetStockWatchList")]
+        public async Task<IActionResult> GetStockWatchList()
+        {
+            try
+            {
+                var identity = User.Identity as ClaimsIdentity;
+                if (identity != null)
+                {
+                    IEnumerable<Claim> claims = identity.Claims;
+                    var name = claims.Where(p => p.Type == "ID").FirstOrDefault()?.Value;
+                    var dt = from t1 in _context.NserealTimePairs
+                             join t2 in _context.WatchLists on t1.Id equals t2.Stkid into g
+                             from t2 in g.DefaultIfEmpty()
+                             where t2.Uid == Convert.ToInt32(name) || t2.Uid == null
+                             orderby t2.Uid descending
+                             select new { t1.Change, t1.Close, t1.Code, t1.Gmtoffset, t1.High, t1.Id, t1.Low, t1.Open, t1.PreviousClose, t1.Timestamp, t1.Volume, LikeValue = t2.IsLike.ToString() ?? "" };
+                    dt.ToList();
+                    return Ok(new { res = dt });
+                }
+                return BadRequest();
+            }
+            catch (Exception ex)
+            {
+                throw;
+            }
+
+        }
+        [HttpGet]
+        [Route("GetCommWatchList")]
+        public async Task<IActionResult> GetCommWatchList()
+        {
+            try
+            {
+                var identity = User.Identity as ClaimsIdentity;
+                if (identity != null)
+                {
+                    IEnumerable<Claim> claims = identity.Claims;
+                    var name = claims.Where(p => p.Type == "ID").FirstOrDefault()?.Value;
+                    var dt = from t1 in _context.CommRealTimePairs
+                             join t2 in _context.WatchLists on t1.Id equals t2.CommId into g
+                             from t2 in g.DefaultIfEmpty()
+                             where t2.Uid == Convert.ToInt32(name) || t2.Uid == null
+                             orderby t2.Uid descending
+                             select new { t1.Change, t1.Close, t1.Code, t1.Gmtoffset, t1.High, t1.Id, t1.Low, t1.Open, t1.PreviousClose, t1.Timestamp, t1.Volume, LikeValue = t2.IsLike.ToString() ??  ""};
+                    dt.ToList();
+
+
+
+                    return Ok(new { res = dt });
+                }
+                return BadRequest();
+            }
+            catch (Exception ex)
+            {
+                return BadRequest();
+            }
+
+        }
+        [HttpPost]
+        [Route("SetWatchList")]
+        public async Task<IActionResult> SetWatchList([FromBody] WatchListDto dto)
+        {
+            var identity = User.Identity as ClaimsIdentity;
+            if (identity != null)
+            {
+                IEnumerable<Claim> claims = identity.Claims;
+                var name = claims.Where(p => p.Type == "ID").FirstOrDefault()?.Value;
+                var result = _watchListService.SetFav(Convert.ToInt32(name), dto.PairId, dto.tbl, dto.like);
+                return Ok(new { res = result });
+            }
+            return BadRequest();
+        }
+    }
+}

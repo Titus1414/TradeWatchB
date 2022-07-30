@@ -1,0 +1,196 @@
+﻿@model List<TradeWatchB.Models.Currency>;
+@inject TradeWatchB.Models.TradeWatchDBContext _context;
+
+<style>
+    .switch {
+        position: relative;
+        display: inline-block;
+        width: 50px;
+        height: 23px;
+    }
+
+        .switch input {
+            opacity: 0;
+            width: 0;
+            height: 0;
+        }
+
+    .slider {
+        position: absolute;
+        cursor: pointer;
+        top: 0;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        background-color: #ccc;
+        -webkit-transition: .4s;
+        transition: .4s;
+    }
+
+    .slider1 {
+        position: absolute;
+        cursor: pointer;
+        top: 0;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        background-color: #430bef61;
+        -webkit-transition: .4s;
+        transition: .4s;
+    }
+
+    .slider:before {
+        position: absolute;
+        content: "";
+        height: 16px;
+        width: 16px;
+        left: 4px;
+        bottom: 4px;
+        background-color: white;
+        -webkit-transition: .4s;
+        transition: .4s;
+    }
+
+    .slider1:before {
+        position: absolute;
+        content: "";
+        height: 16px;
+        width: 16px;
+        left: 4px;
+        bottom: 4px;
+        background-color: white;
+        -webkit-transition: .4s;
+        transition: .4s;
+    }
+
+    input:checked + .slider {
+        background-color: #2196F3;
+    }
+
+    input:focus + .slider {
+        box-shadow: 0 0 1px #2196F3;
+    }
+
+    input:checked + .slider:before {
+        -webkit-transform: translateX(26px);
+        -ms-transform: translateX(26px);
+        transform: translateX(26px);
+    }
+
+    input:checked + .slider1 {
+        background-color: #2196F3;
+    }
+
+    input:focus + .slider1 {
+        box-shadow: 0 0 1px #2196F3;
+    }
+
+    input:checked + .slider1:before {
+        -webkit-transform: translateX(26px);
+        -ms-transform: translateX(26px);
+        transform: translateX(26px);
+    }
+
+    / Rounded sliders /
+    .slider.round {
+        border-radius: 34px;
+        /*width: 50px;
+            height: 23px;*/
+    }
+
+    .slider1.round {
+        border-radius: 34px;
+        /*width: 50px;
+            height: 23px;*/
+    }
+
+    .slider.round:before {
+        border-radius: 50%;
+    }
+
+    .slider1.round:before {
+        border-radius: 50%;
+        margin-left: 25px;
+    }
+
+    #simpleinput {
+        background-color: #45474c;
+        color: #fff;
+    }
+</style>
+@{
+    var AllStored = _context.Exchanges.Where(a => a.IsActive == true && a.Currency != "Unknown").ToList();
+}
+
+<div class="form-group row">
+    <label class="col-lg-4 col-form-label" for="simpleinput">Stock Exchange Names</label>
+    <div class="col-lg-8">
+        <select class="js-example-basic-single form-control" name="ExId" id="simpleinput">
+            <option>Select</option>
+            @foreach (var item in AllStored)
+            {
+                <option value="@item.Id">@item.Name</option>
+            }
+        </select>
+    </div>
+    
+</div>
+
+
+<div class="container-fluid" style="background-color: #f1efef;">
+    <h3>All Pairs</h3>
+
+    <table id="datatable-buttons" class="table table-striped dt-responsive nowrap" style="width:1000px !important">
+        <thead>
+            <tr>
+                <th>Name</th>
+                <th>Code</th>
+                <th>FkCode</th>
+                <th>Action</th>
+            </tr>
+        </thead>
+
+        <tbody>
+
+            @foreach (var item in Model)
+            {
+                <tr>
+                    <th>@item.Name</th>
+                    <th>@item.Code</th>
+                    <th>@item.FkCode</th>
+                    <th>
+                        @if (item.IsActive == true)
+                        {
+                            <label for="myInput" class="switch">
+                                <input name="Vote" id="Vote" checked type="checkbox" style="display:none" />
+                                @*<a href="@Url.Action("ChangeStatus","Store",new {Id=item.BussinessStoreId })"> <span class="slider1 round"></span> </a>*@
+                                <a href="@Url.Action("ActiveExch","StockPair",new {Id=item.Id })"> <span class="slider1 round"></span> </a>
+                            </label>
+                        }
+                        else
+                        {
+                            <label for="myInput" class="switch">
+                                <input name="Vote" id="Vote" checked type="checkbox" style="display:none" />
+                                <a href="@Url.Action("ActiveExch","StockPair",new {Id=item.Id })"> <span class="slider round"></span> </a>
+                            </label>
+                        }
+
+                        <a data-toggle="modal" data-target="#Edit_@item.Id" title="Remove"> <i style="color:red" data-feather="trash-2"></i></a>
+                    </th>
+                </tr>
+            }
+
+        </tbody>
+
+    </table>
+</div>
+<script src="~/js/jquery.min.js"></script>
+<script type="text/javascript">
+    $("#simpleinput").change(function () {
+        var sd = $("#simpleinput").val();
+        var url = '/StockPair/Index?Id=' + sd + '&&search' + null;
+        window.location.href = url;
+        //alert('Awesome !');
+    });
+
+</script>

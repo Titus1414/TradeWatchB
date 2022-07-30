@@ -1,0 +1,19 @@
+﻿using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Threading.Tasks;
+using TradeWatchB.Models;
+using TradeWatchB.Models.DTO;
+
+namespace TradeWatchB.Services.WatchListService
+{
+    public interface IWatchListService
+    {
+        Task<List<CcrealTimePair>> Crypto();
+        Task<List<CcrealTimePair>> Comm();
+        Task<List<ForexRealTimePair>> Forex();
+        Task<List<NserealTimePair>> Stocks();
+        Task<string> SetFav(int uid, int PairId, string tbl, bool like);
+
+    }
+}
